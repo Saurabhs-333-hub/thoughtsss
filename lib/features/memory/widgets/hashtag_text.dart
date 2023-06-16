@@ -25,12 +25,13 @@ class HashTagText extends StatelessWidget {
     List<TextSpan> textSpans = [];
     text.split(' ').forEach((element) {
       if (element.startsWith('#')) {
-        textSpans.add(
-            TextSpan(text: '$element ', style: TextStyle(color: Colors.blue)));
+        textSpans.add(TextSpan(
+            text: '$element ',
+            style: TextStyle(color: Colors.blue, fontSize: 20)));
       } else if (element.startsWith('www.') || element.startsWith('https://')) {
         textSpans.add(TextSpan(
             text: '$element ',
-            style: TextStyle(color: Colors.blue),
+            style: TextStyle(color: Colors.blue, fontSize: 20),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
                 if (element.startsWith('www.')) {
@@ -40,9 +41,8 @@ class HashTagText extends StatelessWidget {
                 }
               }));
       } else {
-        textSpans.add(TextSpan(
-          text: '$element ',
-        ));
+        textSpans
+            .add(TextSpan(text: '$element ', style: TextStyle(fontSize: 16)));
       }
     });
     return Container(

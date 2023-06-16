@@ -6,34 +6,34 @@ import 'package:thoughtsss/constants/appwrite_constants.dart';
 import 'package:thoughtsss/core/core.dart';
 import 'package:thoughtsss/core/providers.dart';
 import 'package:thoughtsss/models/memory_model.dart';
+import 'package:thoughtsss/models/reply_model.dart';
 
-final memoryAPIProvider = Provider((ref) {
-  return MemoryAPI(
+final replyAPIProvider = Provider((ref) {
+  return ReplyAPI(
       db: ref.watch(appwriteDatabaseProvider),
       realTime: ref.watch(appwriteRealTimeProvider));
 });
 
-abstract class IMemoryAPI {
-  FutureEither<Document> shareMemory(Memory memory);
-  Future<List<Document>> getMemories();
-  Stream<RealtimeMessage> getLatestMemory();
-  FutureEither<Document> likeMemory(Memory memory);
-  FutureEither<Document> updatedReshareCount(Memory memory);
-  Future<List<Document>> getRepliesToMemory(Memory memory);
+abstract class IReplyAPI {
+  FutureEither<Document> shareReply(Reply memory);
+  Future<List<Document>> getReplies();
+  Stream<RealtimeMessage> getLatestReply();
+  FutureEither<Document> likeReply(Reply memory);
+  FutureEither<Document> updatedReshareCount(Reply memory);
 }
 
-class MemoryAPI implements IMemoryAPI {
+class ReplyAPI implements IReplyAPI {
   final Databases _db;
   final Realtime _realTime;
-  MemoryAPI({required Databases db, required Realtime realTime})
+  ReplyAPI({required Databases db, required Realtime realTime})
       : _db = db,
         _realTime = realTime;
   @override
-  FutureEither<Document> shareMemory(Memory memory) async {
+  FutureEither<Document> shareReply(Reply memory) async {
     try {
       final document = await _db.createDocument(
           databaseId: AppwriteConstants.databaseId,
-          collectionId: AppwriteConstants.memoriesCollection,
+          collectionId: AppwriteConstants.repliesCollection,
           documentId: ID.unique(),
           data: memory.toMap());
       return right(document);
@@ -46,27 +46,27 @@ class MemoryAPI implements IMemoryAPI {
   }
 
   @override
-  Future<List<Document>> getMemories() async {
+  Future<List<Document>> getReplies() async {
     final documents = await _db.listDocuments(
         databaseId: AppwriteConstants.databaseId,
-        collectionId: AppwriteConstants.memoriesCollection,
-        queries: [Query.orderDesc('createdAt'), Query.equal('repliedTo', '')]);
+        collectionId: AppwriteConstants.repliesCollection,
+        queries: [Query.orderDesc('createdAt')]);
     return documents.documents;
   }
 
   @override
-  Stream<RealtimeMessage> getLatestMemory() {
+  Stream<RealtimeMessage> getLatestReply() {
     return _realTime.subscribe([
-      'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.memoriesCollection}.documents'
+      'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.repliesCollection}.documents'
     ]).stream;
   }
 
   @override
-  FutureEither<Document> likeMemory(Memory memory) async {
+  FutureEither<Document> likeReply(Reply memory) async {
     try {
       final document = await _db.updateDocument(
           databaseId: AppwriteConstants.databaseId,
-          collectionId: AppwriteConstants.memoriesCollection,
+          collectionId: AppwriteConstants.repliesCollection,
           documentId: memory.id,
           data: {'likes': memory.likes});
       return right(document);
@@ -79,11 +79,11 @@ class MemoryAPI implements IMemoryAPI {
   }
 
   @override
-  FutureEither<Document> updatedReshareCount(Memory memory) async {
+  FutureEither<Document> updatedReshareCount(Reply memory) async {
     try {
       final document = await _db.updateDocument(
           databaseId: AppwriteConstants.databaseId,
-          collectionId: AppwriteConstants.memoriesCollection,
+          collectionId: AppwriteConstants.repliesCollection,
           documentId: memory.id,
           data: {'reShareCount': memory.reShareCount});
       return right(document);
@@ -93,14 +93,5 @@ class MemoryAPI implements IMemoryAPI {
     } catch (e, st) {
       return left(Failure(e.toString(), st.toString()));
     }
-  }
-
-  @override
-  Future<List<Document>> getRepliesToMemory(Memory memory) async {
-    final document = await _db.listDocuments(
-        databaseId: AppwriteConstants.databaseId,
-        collectionId: AppwriteConstants.memoriesCollection,
-        queries: [Query.equal('repliedTo', memory.id)]);
-    return document.documents;
   }
 }

@@ -41,7 +41,7 @@ dependencies:
   # uuid: ^3.0.7
   timeago: ^3.4.0
   # any_link_preview: ^3.0.0
-  # flutter_svg: ^2.0.6
+  flutter_svg: ^2.0.6
   # icons_plus: ^4.0.0
   like_button: ^2.0.5
   container_tab_indicator: ^0.3.0
@@ -76,9 +76,11 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/bookmark.svg
+    - assets/comment.svg
+    - assets/share.svg
+    - assets/views.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

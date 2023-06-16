@@ -129,10 +129,7 @@ class _NewWidgetState extends State<NewWidget> {
                 color: Color.fromARGB(9, 119, 0, 255),
                 child: SizedBox(height: 600, width: 200)),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: MemoryList(),
-          ),
+          MemoryList(),
           Text("hi"),
           Text("hi"),
           Text("hi"),

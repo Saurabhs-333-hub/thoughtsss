@@ -27,7 +27,7 @@ class _CarouselImageState extends State<CarouselImage> {
           children: [
             Container(
               decoration: BoxDecoration(
-                  color: Color.fromARGB(36, 128, 0, 255),
+                  color: Color.fromARGB(0, 128, 0, 255),
                   borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(20),
                       bottomLeft: Radius.circular(20),

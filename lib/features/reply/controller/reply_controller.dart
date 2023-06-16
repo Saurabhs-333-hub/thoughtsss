@@ -3,65 +3,59 @@ import 'dart:io';
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:thoughtsss/apis/memory_api.dart';
+import 'package:thoughtsss/apis/reply_api.dart';
+import 'package:thoughtsss/apis/reply_api.dart';
 import 'package:thoughtsss/apis/storage_api.dart';
 import 'package:thoughtsss/core/enums/memory_type_enum.dart';
 import 'package:thoughtsss/core/utils.dart';
 import 'package:thoughtsss/features/auth/controller/auth_controller.dart';
-import 'package:thoughtsss/models/memory_model.dart';
+import 'package:thoughtsss/models/reply_model.dart';
 import 'package:thoughtsss/models/reply_model.dart';
 import 'package:thoughtsss/models/usermodel.dart';
-import 'package:appwrite/models.dart' as model;
 
-final memoryControllerProvider =
-    StateNotifierProvider<MemoryController, bool>((ref) {
-  return MemoryController(
+final replyControllerProvider =
+    StateNotifierProvider<ReplyController, bool>((ref) {
+  return ReplyController(
       ref: ref,
-      memoryAPI: ref.watch(memoryAPIProvider),
+      replyAPI: ref.watch(replyAPIProvider),
       storageAPI: ref.watch(storageAPIProvider));
 });
-final getMemoriesProvider = FutureProvider((ref) async {
-  final memoryController = ref.watch(memoryControllerProvider.notifier);
-  return memoryController.getMemories();
+final getRepliesProvider = FutureProvider((ref) async {
+  final replyController = ref.watch(replyControllerProvider.notifier);
+  return replyController.getReplies();
 });
 
-final getReplyToMemoriesProvider =
-    FutureProvider.family((ref, Memory memory) async {
-  final memoryController = ref.watch(memoryControllerProvider.notifier);
-  return memoryController.getRepliesToMemory(memory);
+final getlatestReplyProvider = StreamProvider.autoDispose((ref) {
+  final replyProvider = ref.watch(replyAPIProvider);
+  return replyProvider.getLatestReply();
 });
 
-final getlatestMemoryProvider = StreamProvider.autoDispose((ref) {
-  final memoryProvider = ref.watch(memoryAPIProvider);
-  return memoryProvider.getLatestMemory();
-});
-
-class MemoryController extends StateNotifier<bool> {
-  MemoryAPI _memoryAPI;
+class ReplyController extends StateNotifier<bool> {
+  ReplyAPI _replyAPI;
   StorageAPI _storageAPI;
 
   Ref _ref;
-  MemoryController(
+  ReplyController(
       {required Ref ref,
-      required MemoryAPI memoryAPI,
+      required ReplyAPI replyAPI,
       required StorageAPI storageAPI})
       : _ref = ref,
-        _memoryAPI = memoryAPI,
+        _replyAPI = replyAPI,
         _storageAPI = storageAPI,
         super(false);
-  Future<List<Memory>> getMemories() async {
-    final memroyList = await _memoryAPI.getMemories();
-    return memroyList.map((e) => Memory.fromMap(e.data)).toList();
+  Future<List<Reply>> getReplies() async {
+    final memroyList = await _replyAPI.getReplies();
+    return memroyList.map((e) => Reply.fromMap(e.data)).toList();
   }
 
-  void likeMemory(Memory memory, UserModel userModel) async {
-    List<String> likes = memory.likes;
-    if (memory.likes.contains(userModel.uid)) {
+  void likereply(Reply reply, UserModel userModel) async {
+    List<String> likes = reply.likes;
+    if (reply.likes.contains(userModel.uid)) {
       likes.remove(userModel.uid);
     } else {
       likes.add(userModel.uid);
     }
-    final res = await _memoryAPI.likeMemory(memory);
+    final res = await _replyAPI.likeReply(reply);
     res.fold(
       (l) => null,
       (r) => null,
@@ -69,26 +63,26 @@ class MemoryController extends StateNotifier<bool> {
   }
 
   void updateReshareCount(
-      Memory memory, UserModel userModel, BuildContext context) async {
-    memory = memory.copyWith(
+      Reply reply, UserModel userModel, BuildContext context) async {
+    reply = reply.copyWith(
         reMemoryBy: userModel.username,
         likes: [],
         commentIds: [],
-        reShareCount: memory.reShareCount + 1,
+        reShareCount: reply.reShareCount + 1,
         createdAt: DateTime.now());
-    final res = await _memoryAPI.updatedReshareCount(memory);
+    final res = await _replyAPI.updatedReshareCount(reply);
     res.fold(
       (l) => showSnackBar(context, l.message),
       (r) async {
-        memory = memory.copyWith(id: ID.unique(), reShareCount: 0);
-        final res2 = await _memoryAPI.shareMemory(memory);
+        reply = reply.copyWith(id: ID.unique(), reShareCount: 0);
+        final res2 = await _replyAPI.shareReply(reply);
         res2.fold((l) => showSnackBar(context, l.message),
             (r) => showSnackBar(context, 'Reshared'));
       },
     );
   }
 
-  void shareMemories(
+  void shareReplies(
       {required List<File> images,
       required String text,
       required BuildContext context,
@@ -98,19 +92,14 @@ class MemoryController extends StateNotifier<bool> {
       return;
     }
     if (images.isNotEmpty) {
-      _shareImageMemories(
+      _shareImageReplies(
           images: images, text: text, context: context, repliedTo: repliedTo);
     } else {
-      _shareTextMemories(text: text, context: context, repliedTo: repliedTo);
+      _shareTextReplies(text: text, context: context, repliedTo: repliedTo);
     }
   }
 
-  Future<List<Memory>> getRepliesToMemory(Memory memory) async {
-    final document = await _memoryAPI.getRepliesToMemory(memory);
-    return document.map((e) => Memory.fromMap(e.data)).toList();
-  }
-
-  void _shareImageMemories(
+  void _shareImageReplies(
       {required List<File> images,
       required String text,
       required BuildContext context,
@@ -120,7 +109,7 @@ class MemoryController extends StateNotifier<bool> {
     String links = getLinkFromText(text);
     final user = _ref.watch(currentUserProvider).value!;
     final imageLinks = await _storageAPI.uploadImage(images);
-    Memory memory = Memory(
+    Reply reply = Reply(
         text: text,
         hashtags: hashtags,
         link: links,
@@ -134,7 +123,7 @@ class MemoryController extends StateNotifier<bool> {
         reShareCount: 0,
         reMemoryBy: '',
         repliedTo: repliedTo);
-    final res = await _memoryAPI.shareMemory(memory);
+    final res = await _replyAPI.shareReply(reply);
     state = false;
     res.fold(
       (l) => showSnackBar(context, l.message),
@@ -142,7 +131,7 @@ class MemoryController extends StateNotifier<bool> {
     );
   }
 
-  void _shareTextMemories(
+  void _shareTextReplies(
       {required String text,
       required BuildContext context,
       required String repliedTo}) async {
@@ -150,7 +139,7 @@ class MemoryController extends StateNotifier<bool> {
     final hashtags = getHashTagFromText(text);
     String links = getLinkFromText(text);
     final user = _ref.watch(currentUserProvider).value!;
-    Memory memory = Memory(
+    Reply reply = Reply(
         text: text,
         hashtags: hashtags,
         link: links,
@@ -164,7 +153,7 @@ class MemoryController extends StateNotifier<bool> {
         reShareCount: 0,
         reMemoryBy: '',
         repliedTo: repliedTo);
-    final res = await _memoryAPI.shareMemory(memory);
+    final res = await _replyAPI.shareReply(reply);
     state = false;
     res.fold(
       (l) => showSnackBar(context, l.message),
