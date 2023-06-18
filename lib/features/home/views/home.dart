@@ -70,6 +70,12 @@ class _HomeState extends State<Home> {
                       color: const Color.fromARGB(255, 255, 255, 255),
                     ),
                   ),
+                  BottomNavigationBarItem(
+                    icon: Icon(
+                      _page == 2 ? Icons.home : Icons.home,
+                      color: const Color.fromARGB(255, 255, 255, 255),
+                    ),
+                  ),
                 ],
               )),
         ),

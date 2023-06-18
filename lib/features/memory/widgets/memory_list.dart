@@ -12,6 +12,10 @@ class MemoryList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    void getMemories() {
+      ref.read(getMemoriesProvider);
+    }
+
     return ref.watch(getMemoriesProvider).when(
           data: (memories) {
             return ref.watch(getlatestMemoryProvider).when(
@@ -24,7 +28,7 @@ class MemoryList extends ConsumerWidget {
                         break;
                       }
                     }
-                    if (!isMemoryAlreadyPresent) {
+                    if (!isMemoryAlreadyPresent && latestMemory.repliedTo == "") {
                       if (data.events.contains(
                           'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.memoriesCollection}.documents.*.create')) {
                         memories.insert(0, Memory.fromMap(data.payload));
@@ -48,11 +52,10 @@ class MemoryList extends ConsumerWidget {
                     }
                     return ListView.builder(
                       key: PageStorageKey('Memory'),
-                      itemCount: memories.length > 1 ? memories.length - 1 : 0,
+                      itemCount: memories.length,
                       itemBuilder: (context, index) {
-                        final memory = memories[index + 1];
-
-                        if (index == memories.length - 2) {
+                        final memory = memories[index];
+                        if (index == memories.length - 1) {
                           return Padding(
                               padding: EdgeInsets.only(
                                   bottom: 60.0), // Adjust the padding as needed

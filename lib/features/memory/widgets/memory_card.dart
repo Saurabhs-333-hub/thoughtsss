@@ -58,6 +58,37 @@ class MemoryCard extends ConsumerWidget {
                               ),
                             ),
                           ),
+                        if (memory.repliedTo.isNotEmpty)
+                          ref
+                              .watch(getMemoriesByIDProvider(memory.repliedTo))
+                              .when(
+                                  data: (data) {
+                                    final replyingToUser = ref
+                                        .watch(userDetailsProvider(data.uid))
+                                        .value;
+                                    return Container(
+                                      color: Color.fromARGB(255, 162, 0, 255),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(6.0),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.ios_share_rounded),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 6.0),
+                                              child: Text(
+                                                  'Replying to @${replyingToUser?.username}'),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  error: (error, stackTrace) =>
+                                      ErrorPage(error: error.toString()),
+                                  loading: () => LoadingIndicator(
+                                      indicatorType:
+                                          Indicator.ballClipRotateMultiple)),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Row(

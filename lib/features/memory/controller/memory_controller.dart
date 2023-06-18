@@ -25,6 +25,11 @@ final getMemoriesProvider = FutureProvider((ref) async {
   return memoryController.getMemories();
 });
 
+final getMemoriesByIDProvider = FutureProvider.family((ref,String id) async {
+  final memoryController = ref.watch(memoryControllerProvider.notifier);
+  return memoryController.getMemoriesByID(id);
+});
+
 final getReplyToMemoriesProvider =
     FutureProvider.family((ref, Memory memory) async {
   final memoryController = ref.watch(memoryControllerProvider.notifier);
@@ -53,7 +58,10 @@ class MemoryController extends StateNotifier<bool> {
     final memroyList = await _memoryAPI.getMemories();
     return memroyList.map((e) => Memory.fromMap(e.data)).toList();
   }
-
+Future<Memory>getMemoriesByID(String id)async{
+final memoryList= await _memoryAPI.getMemoryByID(id);
+return Memory.fromMap(memoryList.data);
+}
   void likeMemory(Memory memory, UserModel userModel) async {
     List<String> likes = memory.likes;
     if (memory.likes.contains(userModel.uid)) {
