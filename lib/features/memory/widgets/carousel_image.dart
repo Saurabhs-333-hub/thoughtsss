@@ -25,54 +25,63 @@ class _CarouselImageState extends State<CarouselImage> {
       children: [
         Column(
           children: [
-            Container(
-              decoration: BoxDecoration(
-                  color: Color.fromARGB(0, 128, 0, 255),
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      bottomLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
-                      topRight: Radius.circular(20))),
-              child: ExpandableCarousel(
-                options: CarouselOptions(
-                    // height: 400,
-                    enlargeStrategy: CenterPageEnlargeStrategy.scale,
-                    enlargeCenterPage: true,
-                    // enlargeFactor: 1,
-                    enableInfiniteScroll: false,
-                    viewportFraction: 1,
-                    onPageChanged: (index, reason) {
-                      setState(() {
-                        currentIndex = index;
-                      });
-                    },
-                    // showIndicator: false,
-                    slideIndicator: CircularSlideIndicator()),
-                key: PageStorageKey(widget.imageLinks),
-                items: widget.imageLinks
-                    .map((e) => Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.network(
-                                e,
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
-                                  if (loadingProgress == null) {
-                                    return child;
-                                  }
-                                  return LoadingIndicator(
-                                    indicatorType:
-                                        Indicator.ballClipRotateMultiple,
-                                    backgroundColor:
-                                        Color.fromARGB(29, 255, 255, 255),
-                                    pathBackgroundColor: Colors.black,
-                                    colors: [Colors.white],
-                                  ); // Replace with your custom loader widget
-                                },
-                              )),
-                        ))
-                    .toList(),
+            LayoutBuilder(
+              builder: (context, constraints) => Container(
+                constraints: BoxConstraints(maxWidth: constraints.maxWidth),
+                decoration: BoxDecoration(
+                    color: Color.fromARGB(92, 128, 0, 255),
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        bottomLeft: Radius.circular(20),
+                        bottomRight: Radius.circular(20),
+                        topRight: Radius.circular(20))),
+                child: ExpandableCarousel(
+                  options: CarouselOptions(
+                      // height: 400,
+                      enlargeStrategy: CenterPageEnlargeStrategy.scale,
+                      enlargeCenterPage: true,
+                      // enlargeFactor: 1,
+                      enableInfiniteScroll: false,
+                      viewportFraction: 1,
+                      onPageChanged: (index, reason) {
+                        setState(() {
+                          currentIndex = index;
+                        });
+                      },
+                      // showIndicator: false,
+                      slideIndicator: CircularSlideIndicator()),
+                  key: PageStorageKey(widget.imageLinks),
+                  items: widget.imageLinks
+                      .map((e) => Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              constraints: BoxConstraints(
+                                  maxHeight:
+                                      MediaQuery.of(context).size.height / 2),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.network(
+                                  e,
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) {
+                                      return child;
+                                    }
+                                    return LoadingIndicator(
+                                      indicatorType:
+                                          Indicator.ballClipRotateMultiple,
+                                      backgroundColor:
+                                          Color.fromARGB(29, 255, 255, 255),
+                                      pathBackgroundColor: Colors.black,
+                                      colors: [Colors.white],
+                                    ); // Replace with your custom loader widget
+                                  },
+                                ),
+                              ),
+                            ),
+                          ))
+                      .toList(),
+                ),
               ),
             ),
             // Padding(

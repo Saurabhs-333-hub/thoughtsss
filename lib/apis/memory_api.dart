@@ -20,7 +20,8 @@ abstract class IMemoryAPI {
   FutureEither<Document> likeMemory(Memory memory);
   FutureEither<Document> updatedReshareCount(Memory memory);
   Future<List<Document>> getRepliesToMemory(Memory memory);
-  Future<Document>getMemoryByID(String id);
+  Future<Document> getMemoryByID(String id);
+  Future<List<Document>> getUserMemories(String uid);
 }
 
 class MemoryAPI implements IMemoryAPI {
@@ -107,9 +108,21 @@ class MemoryAPI implements IMemoryAPI {
         queries: [Query.equal('repliedTo', memory.id)]);
     return document.documents;
   }
-  
+
   @override
-  Future<Document> getMemoryByID(String id)async {
-return _db.getDocument(databaseId: AppwriteConstants.databaseId, collectionId: AppwriteConstants.memoriesCollection, documentId: id);
+  Future<Document> getMemoryByID(String id) async {
+    return _db.getDocument(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.memoriesCollection,
+        documentId: id);
+  }
+
+  @override
+  Future<List<Document>> getUserMemories(String uid) async {
+    final document = await _db.listDocuments(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.memoriesCollection,
+        queries: [Query.equal('uid', uid)]);
+    return document.documents;
   }
 }
